@@ -24,33 +24,8 @@ ax1.legend(numpoints = 1)
 ax2.legend(numpoints = 1)
 ax3.legend(numpoints = 1)
 plt.ylim([-0.1,1.1])
-#plt.show()
-
-
-'''
-np.random.seed(1337)
-
-sample_size = 3
-x_seed = [1, 0, 0, 0, 0, 0]
-y_seed = [1, 0.8, 0.6, 0, 0, 0]
-
-x_train = np.array([[x_seed] * sample_size]).reshape(sample_size,len(x_seed),1)
-y_train = np.array([[y_seed]*sample_size]).reshape(sample_size,len(y_seed),1)
-print(x_train.view())
-print(x_train[0])
-print(x_train[1])
-print(x_train[2])
-print(np.shape(x_train))
-
-model=Sequential()
-model.add(SimpleRNN(input_dim  =  1, output_dim = 50, return_sequences = True))
-model.add(TimeDistributed(Dense(output_dim = 1, activation  =  "sigmoid")))
-model.compile(loss = "mse", optimizer = "rmsprop")
-model.fit(x_train, y_train, nb_epoch = 10, batch_size = 32)
-'''
-
-
-
+plt.title('Batch simple')
+plt.show()
 
 ##
 # Parametros de la red
@@ -68,17 +43,28 @@ dim_out = 1
 # If True, the last state for each sample at index i in a batch 
 # will be used as initial state for the sample of index i in the 
 # following batch.
+##
 
 model = Sequential()
 model.add(SimpleRNN(input_dim = 2,
                     units = 50,
                     stateful = False,
+                   # batch_input_shape = (25,10,2),
                     return_sequences = True))
+
 # Que activacion usar ??
 model.add(Dense(units = 1, activation = "sigmoid"))
 
+
+##
+# Formato de input de la red. CUIDADO, las redes neuronales recursivas se manejan con
+# "timesteps", con lo cual la data es separada en batches
+# https://stackoverflow.com/questions/38294046/simple-recurrent-neural-network-input-shape
+##
+
+
 # Shape (2,data_length)
-sample_size = 100
+sample_size = 1000
 in_list = np.array([set_dat, reset_dat])
 print(np.shape(in_list))
 x_train = np.array([[in_list] * sample_size]).reshape(len(set_dat),sample_size,2)
@@ -88,12 +74,13 @@ print(np.shape(y_train))
 
 # Paso de compilacion
 # For a mean squared error regression problem
-model.compile(optimizer='rmsprop',
-              loss='mse')
+#model.compile(optimizer='rmsprop',
+#              loss='mse')
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
 # Train the model, iterating on the data in batches of 32 samples
 history = model.fit(x_train, y_train,
-                    epochs=100, batch_size = 15)
+                    epochs=100, batch_size = 100)
 
 test_in =  np.array([[in_list] * 1]).reshape(len(set_dat),1,2)
 out = np.array(model.predict(test_in))
