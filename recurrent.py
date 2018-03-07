@@ -63,10 +63,11 @@ model.add(SimpleRNN(input_dim = dim_inp,
                     #batch_input_shape = (200000,10,2),
                     dropout = 0,
                     recurrent_dropout = 0,
-                    return_sequences = True))
+                    return_sequences = True,
+                    activation = "linear"))
 
 # Que activacion usar ??
-model.add(Dense(units = dim_out, activation = "sigmoid"))
+model.add(Dense(units = dim_out, activation = "linear"))
 
 
 ##
@@ -83,8 +84,8 @@ model.add(Dense(units = dim_out, activation = "sigmoid"))
 # guardados arrays de shape (2, 25)
 ##
 
-largo_seed = 50
-cantidad_de_timesteps = 20000
+largo_seed = 10000
+cantidad_de_timesteps = 100
 entrada_array = np.zeros((largo_seed, cantidad_de_timesteps, dim_inp))
 salida_array = np.zeros((largo_seed, cantidad_de_timesteps, dim_out))
 print('entrada_array shape '+str(np.shape(entrada_array)))
@@ -112,11 +113,11 @@ print('------------------------------------------------------------------')
 # For a mean squared error regression problem
 # model.compile(optimizer='rmsprop',
 #               loss='mse')
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['binary_accuracy'])
+model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['binary_accuracy'], sample_weight_mode = "temporal")
 
 # Train the model, iterating on the data in batches
 history = model.fit(x_train, y_train,
-                    epochs=5, batch_size = 50)
+                    epochs=10, batch_size = 25)
 
 
 # Test simple
@@ -131,11 +132,18 @@ test_out[:,0,0] = test_o
 
 out = np.array(model.predict(test_in))
 out = out[:,0,0]
-f, (ax1, ax2) = plt.subplots(2, sharex = True, sharey = False)
-ax1.plot(test_o, '-o', color = 'red', label = 'output real')
-ax2.plot(out, '-o', color = 'blue', label = 'output red')
+f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex = True, sharey = False)
+ax1.plot(test_s, '-o', color = 'green', label = 'set real')
+plt.ylim([-0.1,1.1])
+ax2.plot(test_r, '-o', color = 'blue', label = 'reset real')
+plt.ylim([-0.1,1.1])
+ax3.plot(test_o, '-o', color = 'red', label = 'output real')
+plt.ylim([-0.1,1.1])
+ax4.plot(out, '-o', color = 'black', label = 'output red')
 ax1.legend(numpoints = 1)
 ax2.legend(numpoints = 1)
+ax3.legend(numpoints = 1)
+ax4.legend(numpoints = 1)
 plt.ylim([-0.1,1.1])
 
 plt.savefig('simple_test.png')
