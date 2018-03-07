@@ -113,7 +113,7 @@ print('------------------------------------------------------------------')
 # For a mean squared error regression problem
 # model.compile(optimizer='rmsprop',
 #               loss='mse')
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['binary_accuracy'], sample_weight_mode = "temporal")
+model.compile(loss='mse', optimizer='adam', metrics=['binary_accuracy'], sample_weight_mode = "temporal")
 
 # Train the model, iterating on the data in batches
 history = model.fit(x_train, y_train,
@@ -130,8 +130,23 @@ test_in[:,0,1] = test_r
 test_out = np.zeros((1000,1,1))
 test_out[:,0,0] = test_o
 
+# La red parece estar siguiendo la siguiente regla
+# array para chequear eso
+tato = np.zeros(1000)
+for idx in range(len(test_s)):
+    if test_s[idx]== 0 and test_r[idx] == 0:
+        tato[idx] = 1
+    if test_s[idx]== 0 and test_r[idx] == 1:
+        tato[idx] = 0
+    if test_s[idx]== 1 and test_r[idx] == 0:
+        tato[idx] = 1
+
 out = np.array(model.predict(test_in))
 out = out[:,0,0]
+
+plt.plot(tato,out, 'o')
+plt.show()
+
 f, (ax1, ax2, ax3, ax4) = plt.subplots(4, sharex = True, sharey = False)
 ax1.plot(test_s, '-o', color = 'green', label = 'set real')
 plt.ylim([-0.1,1.1])
