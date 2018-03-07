@@ -41,6 +41,11 @@ dim_out = 1
 # If True, the last state for each sample at index i in a batch 
 # will be used as initial state for the sample of index i in the 
 # following batch.
+#
+# If a RNN is stateful, it needs to know its batch size. 
+# Specify the batch size of your input tensors: 
+# - If using a Sequential model, specify the batch size by passing 
+#   a `batch_input_shape` argument to your first layer.
 ##
 
 ##
@@ -55,7 +60,7 @@ model = Sequential()
 model.add(SimpleRNN(input_dim = dim_inp,
                     units = units_rnn,
                     stateful = False,
-                   # batch_input_shape = (25,10,2),
+                    #batch_input_shape = (200000,10,2),
                     dropout = 0,
                     recurrent_dropout = 0,
                     return_sequences = True))
@@ -78,8 +83,8 @@ model.add(Dense(units = dim_out, activation = "sigmoid"))
 # guardados arrays de shape (2, 25)
 ##
 
-largo_seed = 100000
-cantidad_de_timesteps = 10
+largo_seed = 50
+cantidad_de_timesteps = 20000
 entrada_array = np.zeros((largo_seed, cantidad_de_timesteps, dim_inp))
 salida_array = np.zeros((largo_seed, cantidad_de_timesteps, dim_out))
 print('entrada_array shape '+str(np.shape(entrada_array)))
