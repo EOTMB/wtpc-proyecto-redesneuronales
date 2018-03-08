@@ -45,7 +45,17 @@ for sample in np.arange(sample_size):
                 0] = firing_neuron
        
 
-print x_train
-print y_train
+"""Luego se cambian los datos de esta manera:
+mask = np.zeros((sample_size, seq_dur))
+    for sample in np.arange(sample_size):
+        mask[sample,:] = [0 if x == .5 else 1 for x in y_train[sample,:,:]]
+
+    x_train = x_train + stim_noise * np.random.randn(sample_size, seq_dur, 2)
+    params['input_times']   = input_times
+    params['output_times']  = output_times
+    return (x_train, y_train, params, mask)
+"""
+
+
 
 
