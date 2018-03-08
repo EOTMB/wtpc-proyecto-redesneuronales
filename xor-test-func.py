@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Mar 08 13:55:08 2018
-
-@author: Yo
-"""
 import numpy as np
 
 def trainingSRO(x,y,a,b,c,d):

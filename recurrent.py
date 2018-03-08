@@ -1,7 +1,8 @@
 import numpy as np
 import keras
 from keras.models import Sequential
-from keras.layers import SimpleRNN, Dense
+from keras.layers import SimpleRNN, Dense, LSTM, Activation
+from sklearn.utils import class_weight
 
 import matplotlib.pyplot as plt
 
@@ -12,19 +13,19 @@ import matplotlib.pyplot as plt
 set_dat = np.loadtxt('Valores_de_s.csv')
 reset_dat = np.loadtxt('Valores_de_r.csv')
 output_dat = np.loadtxt('Valores_de_o.csv')
-'''
+
+
 # Plot triple para visualizar
 f, (ax1, ax2, ax3) = plt.subplots(3, sharex=True, sharey=True)
-ax1.plot(set_dat[0:1000], '-o', color = 'green', label = 'set')
-ax2.plot(reset_dat[0:1000], '-o', color = 'blue', label = 'reset')
-ax3.plot(output_dat[0:1000], '-o', color = 'red', label = 'output')
+ax1.plot(set_dat[1000:1500], '-o', color = 'green', label = 'set')
+ax2.plot(reset_dat[1000:1500], '-o', color = 'blue', label = 'reset')
+ax3.plot(output_dat[1000:1500], '-o', color = 'red', label = 'output')
 ax1.legend(numpoints = 1)
 ax2.legend(numpoints = 1)
 ax3.legend(numpoints = 1)
 plt.ylim([-0.1,1.1])
-plt.title('Batch simple')
 plt.show()
-'''
+
 ##
 # Parametros de la red
 # dim_inp es el tamano de inputs de la red
@@ -69,7 +70,6 @@ model.add(SimpleRNN(input_dim = dim_inp,
 # Que activacion usar ??
 model.add(Dense(units = dim_out, activation = "linear"))
 
-
 ##
 # Formato de input de la red. CUIDADO, las redes neuronales recursivas se manejan con
 # "timesteps", con lo cual la data es separada en pedazos. Ver el siguiente link:
@@ -113,17 +113,36 @@ print('------------------------------------------------------------------')
 # For a mean squared error regression problem
 # model.compile(optimizer='rmsprop',
 #               loss='mse')
-model.compile(loss='mse', optimizer='adam', metrics=['binary_accuracy'], sample_weight_mode = "temporal")
+model.compile(loss='mse', optimizer='adam', metrics=['accuracy'], 
+              sample_weight_mode = "temporal")
+
+##
+# Sample weight
+##
+#mask = np.zeros((sample_size, seq_dur))
+mask = np.zeros((largo_seed, cantidad_de_timesteps))
+for sample in np.arange(largo_seed):
+    mask[sample,:] = [1 if x == 0 else 1 for x in y_train[sample,:,:]]
+
 
 # Train the model, iterating on the data in batches
 history = model.fit(x_train, y_train,
-                    epochs=10, batch_size = 25)
+                    epochs=10, batch_size = 25,
+                    sample_weight = mask)
 
+pesos_0 = model.layers[0].get_weights()[0]
+pesos_1 = model.layers[1].get_weights()[0]
+print(pesos_0)
+print(pesos_1)
 
 # Test simple
-test_s = set_dat[0:1000]
-test_r = reset_dat[0:1000]
-test_o = output_dat[0:1000]
+#test_s = set_dat[0:1000]
+test_s = entrada_array[0:1000,0,0]
+#test_r = reset_dat[0:1000]
+test_r = entrada_array[0:1000,0,1]
+#test_o = output_dat[0:1000]
+test_o = salida_array[0:1000,0,0]
+
 test_in = np.zeros((1000,1,2))
 test_in[:,0,0] = test_s
 test_in[:,0,1] = test_r
