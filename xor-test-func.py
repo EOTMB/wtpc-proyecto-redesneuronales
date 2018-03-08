@@ -37,7 +37,7 @@ def trainingSRO(x,y,a,b,c,d):
         else:
             S_signal[i:i+x] = 1
             R_signal[i:i+x] = 1
-            O_signal[i:i+x] = 1
+            O_signal[i:i+x] = 0
     S = S_signal
     R = R_signal
     O = O_signal
